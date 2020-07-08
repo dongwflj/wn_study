@@ -148,6 +148,11 @@ public class Tutorial2Activity extends Activity implements CvCameraViewListener2
             mGray = inputFrame.gray();
             FindFeatures(mGray.getNativeObjAddr(), mRgba.getNativeObjAddr());
             break;
+        //missing default case
+        default:
+            // add default case
+            break;
+
         }
 
         return mRgba;
