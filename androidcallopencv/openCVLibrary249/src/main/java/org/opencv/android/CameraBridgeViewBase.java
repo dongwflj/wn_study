@@ -326,6 +326,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 mListener.onCameraViewStopped();
             }
             break;
+        //missing default case
+        default:
+            // add default case
+            break;
+
         };
     }
 
@@ -337,6 +342,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         case STOPPED:
             onExitStoppedState();
             break;
+        //missing default case
+        default:
+            // add default case
+            break;
+
         };
     }
 
