@@ -128,6 +128,12 @@ public abstract class BaseLoaderCallback implements LoaderCallbackInterface {
 
                 WaitMessage.show();
             } break;
+            //missing default case
+            default:
+                // add default case
+                break;
+
+
         }
     }
 
