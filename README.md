@@ -1,2 +1,4 @@
 # wn_study
-Study code
+Ewen Study Code Repo
+## HelloGrpc
+是使用Spring搭建Java的Grpc测试的例子，代码可以实现简单的grpc调用和流式调用，需要先通过proto插件生成对应的接口，java还有个java通信接口生成的插件。最后生成后需要将json资源文件放到对应的taget目录下，后面可以直接配置生成到对应的目录
