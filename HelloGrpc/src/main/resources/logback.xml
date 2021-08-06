@@ -36,6 +36,6 @@
     </root>
 
 	<!-- 定义各个包的详细路径，继承root宝的值 -->
-	<logger name="io.netty" level="INFO" />
-	<logger name="com.hry.spring" level="INFO" />
+	<!--logger name="io.grpc" level="DEBUG" /-->
+	<logger name="com.hry.spring" level="DEBUG" />
 </configuration>

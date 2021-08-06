@@ -42,7 +42,7 @@ public class HelloStreamClient {
 	 * 一元服务调用
 	 */
 	public void simpleRpc(int num) {
-		logger.info("request simpleRpc: num={}", num);
+		logger.info(">>> simpleRpc: num={}", num);
 		Simple simple = Simple.newBuilder().setName("simpleRpc").setNum(num).build();
 		SimpleFeature feature;
 		try {
@@ -59,8 +59,8 @@ public class HelloStreamClient {
 	 */
 	public void server2ClientRpc(int num1, int num2) {
 		logger.info("request server2ClientRpc num1={}, num2={}", num1, num2);
-		Simple simple = Simple.newBuilder().setName("simple2" + num1).setNum(num1).build();
-		Simple simple2 = Simple.newBuilder().setName("simple2" + num2).setNum(num2).build();
+		Simple simple = Simple.newBuilder().setName("simple" + num1).setNum(num1).build();
+		Simple simple2 = Simple.newBuilder().setName("simple" + num2).setNum(num2).build();
 
 		SimpleList simpleList = SimpleList.newBuilder().addSimpleList(simple).addSimpleList(simple2).build();
 		Iterator<SimpleFeature> simpleFeatureIter = blockingStub.server2ClientRpc(simpleList);
@@ -83,7 +83,7 @@ public class HelloStreamClient {
 			@Override
 			public void onNext(SimpleSummary value) {
 				// 返回SimpleSummary
-				logger.info("client2ServerRpc onNext : {}", value);
+				logger.info("client2ServerRpc response onNext : {}", value);
 			}
 
 			@Override
@@ -94,17 +94,17 @@ public class HelloStreamClient {
 
 			@Override
 			public void onCompleted() {
-				logger.error("client2ServerRpc finish");
+				logger.info("client2ServerRpc response finish");
 				finishLatch.countDown();
 			}
 		};
 		StreamObserver<Simple> requestObserver = asyncStub.client2ServerRpc(responseObserver);
 		try {
 			for (int i = 0; i < count; i++) {
-				logger.info("simple2 : {}", i);
-				Simple simple = Simple.newBuilder().setName("client2ServerRpc" + i).setNum(i).build();
+				Simple simple = Simple.newBuilder().setName("client2ServerRpc" + i).setNum(i+1).build();
 				requestObserver.onNext(simple);
-				Thread.sleep(random.nextInt(200) + 50);
+				logger.info("client2ServerRpc request : {}", simple);
+				//Thread.sleep(random.nextInt(200) + 50);
 			}
 		} catch (RuntimeException e) {
 			// Cancel RPC
@@ -169,21 +169,17 @@ public class HelloStreamClient {
 
 	public static void main(String[] args) throws InterruptedException {
 		HelloStreamClient client = new HelloStreamClient("localhost", 8980);
-	//	java.util.logging.Logger.getGlobal().setLevel(java.util.logging.Level.OFF); 
-//		SLF4JBridgeHandler.removeHandlersForRootLogger();
-//		SLF4JBridgeHandler.install();
-		logger.debug("--------------------sssssssssss-------------");
 		try {
 			// simple2 rpc
 //			client.simpleRpc(1);
-//
+
 //			// server2ClientRpc
-//			client.server2ClientRpc(1, 2);
-
-			// client2ServerRpc
-			client.client2ServerRpc(1000);
-
-			// bindirectionalStreamRpc
+//			client.server2ClientRpc(407838351, 413628156);
+//
+//			// client2ServerRpc
+			client.client2ServerRpc(10000);
+//
+//			// bindirectionalStreamRpc
 //			client.bindirectionalStreamRpc();
 
 		} finally {

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 
 public class HelloStreamServer {
 	private static final Logger logger = LoggerFactory.getLogger(HelloStreamServer.class);
@@ -53,7 +54,9 @@ public class HelloStreamServer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		java.util.logging.Logger.getGlobal().setLevel(java.util.logging.Level.OFF);
+		//java.util.logging.Logger.getGlobal().setLevel(java.util.logging.Level.OFF);
+//		Logger.getLogger("io.grpc").setLevel(Level.INFO);
+//		Logger.class.
 		HelloStreamServer server = new HelloStreamServer(8980);
 		server.start();
 		server.blockUntilShutdown();
@@ -72,26 +75,30 @@ public class HelloStreamServer {
 
 		@Override
 		public void simpleRpc(Simple request, StreamObserver<SimpleFeature> responseObserver) {
-			SimpleFeature rtn = SimpleFeature.newBuilder().setName(request.getName() + "simpleRpc").setLocation(request)
+			logger.info(">>> simpleRpc() request:{}", request);
+			SimpleFeature rtn = SimpleFeature.newBuilder().setName(request.getName() + "fromServer").setLocation(request)
 					.build();
-			logger.info("recevier simpleRpc ： {}", request);
 			responseObserver.onNext(rtn);
 			responseObserver.onCompleted();
+			logger.info("<<< simpleRpc() response：{}", rtn);
 		}
 
 		@Override
 		public void server2ClientRpc(SimpleList request, StreamObserver<SimpleFeature> responseObserver) {
-			logger.info("recevier server2ClientRpc ： {}", request);
+			logger.info(">>> server2ClientRpc():{}", request);
 			for (SimpleFeature feature : this.features) {
+				logger.info("server2ClientRpc() feature: {}", feature);
 				Simple simpleLocation = feature.getLocation();
 				for (Simple o : request.getSimpleListList()) {
 					if (o.getNum() == simpleLocation.getNum()) {
 						// 推送记录
 						responseObserver.onNext(feature);
+						logger.info("server2ClientRpc() send feature: {}", feature);
 					}
 				}
 			}
 			responseObserver.onCompleted();
+			logger.info("<<< server2ClientRpc()");
 		}
 
 		/**
@@ -106,29 +113,32 @@ public class HelloStreamServer {
 				@Override
 				public void onNext(Simple value) {
 					// 接收请求
-					logger.info("num={}, client2ServerRpc, content={} ", feature_count, value);
+					logger.info(">>> client2ServerRpc client stream onNext()：num={}, content={} ", feature_count, value);
 					feature_count++;
 					try {
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 1; i++) {
 							logger.info("Sleep 500ms");
-							Thread.sleep(500);
+							Thread.sleep(5);
 						}
 					}catch (InterruptedException e) {
-						logger.info("Exception");
+						logger.info("client2ServerRpc client stream exception");
 					}
+					logger.info("<<< client2ServerRpc");
+
 				}
 
 				@Override
 				public void onError(Throwable t) {
-					logger.error("Simple cancelled, e={}", t);
+					logger.error("client2ServerRpc client stream error cancelled, e={}", t);
 				}
 
 				@Override
 				public void onCompleted() {
-					logger.info("onCompleted");
+					logger.info("client2ServerRpc client stream onCompleted");
 					// 接收所有请求后，返回总数
 					SimpleSummary summary = SimpleSummary.newBuilder().setFeatureCount(feature_count).build();
 					responseObserver.onNext(summary);
+					logger.info("client2ServerRpc client stream onCompleted SimpleSummary:{}", summary);
 					// 结束请求
 					responseObserver.onCompleted();
 				}
@@ -143,7 +153,7 @@ public class HelloStreamServer {
 			return new StreamObserver<Simple>() {
 				@Override
 				public void onNext(Simple value) {
-					logger.info("bindirectionalStreamRpc receive {}", value);
+					logger.info(">>> bindirectionalStreamRpc client stream onNext()：content={} ", value);
 					for (SimpleFeature feature : features) {
 						Simple simpleLocation = feature.getLocation();
 						if (value.getNum() == simpleLocation.getNum()) {
@@ -153,16 +163,20 @@ public class HelloStreamServer {
 							responseObserver.onNext(rtn);
 						}
 					}
+					logger.info("<<< bindirectionalStreamRpc");
+
 				}
 
 				@Override
 				public void onError(Throwable t) {
-					logger.error("bindirectionalStreamRpc cancelled, e={}", t);
+					logger.error("bindirectionalStreamRpc client stream error cancelled, e={}", t);
 				}
 
 				@Override
 				public void onCompleted() {
+					logger.info(">>> bindirectionalStreamRpc client stream onCompleted()");
 					responseObserver.onCompleted();
+					logger.info("<<< bindirectionalStreamRpc onCompleted()");
 				}
 			};
 		}

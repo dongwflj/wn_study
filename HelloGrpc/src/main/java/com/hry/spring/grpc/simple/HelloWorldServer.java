@@ -17,7 +17,7 @@ public class HelloWorldServer {
 		/* The port on which the server should run */
 		int port = 50051;
 		server = ServerBuilder.forPort(port).addService(new GreeterImpl()).build().start();
-		logger.info("Server started, listening on " + port);
+		logger.info("BytePower server started, listening on port:" + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -25,7 +25,7 @@ public class HelloWorldServer {
 				// JVM shutdown hook.
 				System.err.println("*** shutting down gRPC server since JVM is shutting down");
 				HelloWorldServer.this.stop();
-				System.err.println("*** server shut down");
+				System.err.println("*** BytePower server shut down");
 			}
 		});
 	}
@@ -56,12 +56,13 @@ public class HelloWorldServer {
 	}
 
 	static class GreeterImpl extends GreeterGrpc.GreeterImplBase {
-
 		@Override
 		public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
+			logger.info(">>> Server sayHello");
 			HelloReply reply = HelloReply.newBuilder().setMessage("Hello Ewen " + req.getName()).build();
 			responseObserver.onNext(reply);
 			responseObserver.onCompleted();
+			logger.info("<<< Server sayHello");
 		}
 	}
 }
